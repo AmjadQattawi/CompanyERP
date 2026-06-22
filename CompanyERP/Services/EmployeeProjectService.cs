@@ -2,6 +2,7 @@
 using CompanyERP.Data;
 using CompanyERP.DTOs;
 using CompanyERP.Entities;
+using CompanyERP.Enums;
 using CompanyERP.Exceptions;
 using CompanyERP.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -11,27 +12,38 @@ namespace CompanyERP.Services
     public class EmployeeProjectService : IEmployeeProjectService
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper; 
+        private readonly IMapper _mapper;
+        private readonly IProjectService _projectService; 
 
-        public EmployeeProjectService(AppDbContext context, IMapper mapper) 
+
+        public EmployeeProjectService(AppDbContext context, IMapper mapper, IProjectService projectService) 
         {
             _context = context;
             _mapper = mapper;
+            _projectService = projectService; 
         }
-
         public async Task<AssignEmployeeDto> AssignEmployeeToProjectAsync(AssignEmployeeDto assignEmployeeDto)
         {
-            bool employeeExist = await _context.Employee.AnyAsync(e => e.Id == assignEmployeeDto.EmployeeId);
-
-            if (!employeeExist)
+            var employee = await _context.Employee.FirstOrDefaultAsync(e => e.Id == assignEmployeeDto.EmployeeId);
+            if (employee == null)
             {
                 throw new NotFoundException($"Employee with ID {assignEmployeeDto.EmployeeId} was not found.");
             }
 
-            bool projectExist = await _context.Project.AnyAsync(p => p.Id == assignEmployeeDto.ProjectId);
-            if (!projectExist)
+            var project = await _context.Project.FirstOrDefaultAsync(p => p.Id == assignEmployeeDto.ProjectId);
+            if (project == null)
             {
                 throw new NotFoundException($"Project with ID {assignEmployeeDto.ProjectId} was not found");
+            }
+
+            if (project.Status == ProjectStatus.Pending)
+            {
+                throw new InvalidOperationException("Cannot assign employees to a Pending project. The project must be Active.");
+            }
+
+            if (project.Status == ProjectStatus.Completed)
+            {
+                throw new InvalidOperationException("Cannot assign employees to a Completed project. The project is already closed.");
             }
 
             bool alreadyAssigned = await _context.EmployeeProject
@@ -42,16 +54,25 @@ namespace CompanyERP.Services
                 throw new InvalidOperationException($"Employee with ID {assignEmployeeDto.EmployeeId} is already assigned to Project ID {assignEmployeeDto.ProjectId}.");
             }
 
-            int currentAssignedHours = await _context.EmployeeProject.
-                Where(ep => ep.EmployeeId == assignEmployeeDto.EmployeeId).
-                SumAsync(ep => ep.HoursAssigned);
+            decimal employeeHourlyRate = employee.Salary / 160;
+            decimal expectedNewCost = assignEmployeeDto.HoursAssigned * employeeHourlyRate;
+
+            var budgetReport = await _projectService.GetProjectBudgetReportAsync(assignEmployeeDto.ProjectId);
+            if (expectedNewCost > budgetReport.RemainingBudget)
+            {
+                throw new InvalidOperationException($"Cannot assign employee. This action requires a budget of {expectedNewCost} JOD, but the project only has {budgetReport.RemainingBudget} JOD remaining.");
+            }
+
+            int currentAssignedHours = await _context.EmployeeProject
+                .Where(ep => ep.EmployeeId == assignEmployeeDto.EmployeeId)
+                .SumAsync(ep => ep.HoursAssigned);
+
             if (currentAssignedHours + assignEmployeeDto.HoursAssigned > 160)
             {
-                throw new MaxWorkHoursExceededException($"The total hours across all projects cannot" +
-                    $" exceed 160. The employee currently has {currentAssignedHours} hours assigned.");
+                throw new MaxWorkHoursExceededException($"The total hours across all projects cannot exceed 160. The employee currently has {currentAssignedHours} hours assigned.");
             }
-            var newAssignment = _mapper.Map<EmployeeProject>(assignEmployeeDto);
 
+            var newAssignment = _mapper.Map<EmployeeProject>(assignEmployeeDto);
             _context.EmployeeProject.Add(newAssignment);
             await _context.SaveChangesAsync();
 
