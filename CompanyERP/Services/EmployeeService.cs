@@ -85,7 +85,12 @@ namespace CompanyERP.Services
             }
 
             _mapper.Map(employeeDto, existingEmployee);
-            existingEmployee.PasswordHash = employeeDto.Password;
+
+            if (!string.IsNullOrEmpty(employeeDto.Password))
+            {
+                existingEmployee.PasswordHash = _passwordHasher.HashPassword(existingEmployee, employeeDto.Password);
+            }
+
             await _context.SaveChangesAsync();
 
             return _mapper.Map<EmployeeDto>(existingEmployee);
