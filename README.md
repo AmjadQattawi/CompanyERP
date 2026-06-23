@@ -30,6 +30,7 @@ A RESTful Web API for managing company operations — employees, branches, proje
 - **Payroll Processing** — monthly salary calculation with overtime (1.5×) and deduction logic
 - **Salary Preview** — preview net salary before committing to the database
 - **Automated Payroll** — background worker runs on the 30th of each month, auto-processes all employees and skips those already processed manually
+- **Branch Payroll Report** — aggregated monthly payroll summary per branch: total basic salaries, net salaries, overtime, and deductions across all branch employees
 - **Audit Logging** — every Create / Update / Delete operation across all tables is automatically captured via `SaveChangesAsync` override, storing old/new values as JSON with the acting user's identity
 - **Global Exception Handling** — custom middleware for consistent error responses
 
@@ -81,6 +82,7 @@ CompanyERP/
 | POST | `/api/branches` | Create branch | Admin |
 | PUT | `/api/branches` | Update branch | Admin |
 | DELETE | `/api/branches/{id}` | Delete branch | Admin |
+| GET | `/api/branches/{id}/payroll-report?month=&year=` | Get branch payroll summary | Admin, Manager |
 
 ### Projects
 | Method | Endpoint | Description | Access |
@@ -118,6 +120,7 @@ CompanyERP/
 | Create / Update / Delete projects | ✅ | ✅ | ❌ |
 | Assign / remove employees from projects | ✅ | ✅ | ❌ |
 | Preview & save payroll | ✅ | ✅ | ❌ |
+| View branch payroll report | ✅ | ✅ | ❌ |
 | View audit logs | ✅ | ❌ | ❌ |
 
 ---
