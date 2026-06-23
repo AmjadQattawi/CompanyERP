@@ -92,6 +92,8 @@ builder.Services.AddAuthentication(options =>
 });
 
 
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 app.UseMiddleware<CompanyERP.Exceptions.ExceptionMiddleware>();

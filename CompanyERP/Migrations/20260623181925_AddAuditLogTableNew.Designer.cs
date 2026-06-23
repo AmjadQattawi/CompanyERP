@@ -3,6 +3,7 @@ using System;
 using CompanyERP.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace CompanyERP.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260623181925_AddAuditLogTableNew")]
+    partial class AddAuditLogTableNew
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,40 +24,6 @@ namespace CompanyERP.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CompanyERP.Entities.AuditLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("NewValues")
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("OldValues")
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<string>("TableName")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("TIMESTAMP(7)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AuditLog");
-                });
 
             modelBuilder.Entity("CompanyERP.Entities.Branch", b =>
                 {
@@ -128,7 +97,7 @@ namespace CompanyERP.Migrations
                             BranchId = 99,
                             Email = "admin@company.com",
                             FullName = "System Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEOO9c3M3HSkzho1wdzCTHUhjx2zWpRqNUXyn4cvj2vvMq5lcexM6NVbSHE5rfYKNBg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOE4swqmYeHG+hn0IBwEBCHFJw1a1yD8ekKoFccpkE6XiUwuZgaxpznKRKBIbQlCQg==",
                             Role = 0,
                             Salary = 2500m
                         });

@@ -14,7 +14,7 @@ namespace CompanyERP.Controllers
     {
         private readonly AppDbContext _context;
         private readonly TokenGenerator _tokenGenerator;
-        private readonly IPasswordHasher<Employee> _passwordHasher; 
+        private readonly IPasswordHasher<Employee> _passwordHasher;
 
         public AuthController(AppDbContext context, TokenGenerator tokenGenerator, IPasswordHasher<Employee> passwordHasher)
         {
