@@ -17,6 +17,8 @@ namespace CompanyERP.Data
 
         public DbSet<Payroll> Payroll { get; set; }
 
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

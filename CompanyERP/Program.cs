@@ -1,4 +1,5 @@
-using System.Text.Json.Serialization; 
+using System.Text.Json.Serialization;
+using CompanyERP.BackgroundServices;
 using CompanyERP.IServices;
 using CompanyERP.Profiles;
 using CompanyERP.Services;
@@ -56,6 +57,8 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IEmployeeProjectService, EmployeeProjectService>();
+
+builder.Services.AddHostedService<PayrollBackgroundWorker>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
